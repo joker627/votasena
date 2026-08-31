@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urna Virtual - VotaSena</title>
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="stylesheet" href="css/global.css?v=3">
+    <link rel="stylesheet" href="css/urna.css?v=3">
+</head>
+<body>
+    <!-- Decorative Blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <img src="assets/logo.png" alt="SENA Logo" class="logo-header">
+    <div class="urna-header-titles">
+        <h1 class="urna-main-title">TARJETÓN ELECTORAL SENA</h1>
+        <p class="urna-subtitle">Selecciona a tu candidato preferido o la opción de voto en blanco haciendo clic sobre su tarjeta correspondiente.</p>
+    </div>
+    
+    <div class="jornada-selector" tabindex="0" id="jornadaSelectorContainer">
+        <span class="jornada-label">Jornada:</span>
+        <div class="custom-select">
+            <span id="jornadaSelectedText">Mañana</span>
+            <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="custom-options" id="jornadaOptions">
+            <div class="custom-option selected" data-value="Mañana">Mañana</div>
+            <div class="custom-option" data-value="Tarde">Tarde</div>
+        </div>
+    </div>
+    <input type="hidden" id="jornadaSelect" value="Mañana">
+    
+    <div class="container">
+        <div id="loader" class="loader"></div>
+        <div id="tarjeton" class="candidatos-grid" style="display: none;">
+            <!-- Los candidatos se inyectarán aquí con JS -->
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-content">
+            <h2>¿Confirmas tu voto?</h2>
+            <div id="modalCandidatoInfo" class="modal-info">
+                <img id="modalImg" src="" alt="Candidato" class="modal-img">
+                <h3 id="modalNombre" class="modal-nombre">Nombre</h3>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-confirm" onclick="enviarVoto()">Sí, Votar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de Éxito -->
+    <div class="success-screen" id="successScreen">
+        <div class="success-icon">✓</div>
+        <h1>¡Voto Registrado!</h1>
+        <p class="success-text">Gracias por participar. La pantalla se limpiará sola...</p>
+    </div>
+
+    <script src="js/urna.js"></script>
+</body>
+</html>
