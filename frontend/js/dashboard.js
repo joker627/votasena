@@ -24,57 +24,65 @@ async function cargarResultados() {
         const wTotalCandidatos = document.getElementById('widgetTotalCandidatos');
         if (wTotalCandidatos) wTotalCandidatos.textContent = data.resultados.length;
         
-        const tbody = document.getElementById('cuerpoTabla');
+        const tbody = document.getElementById('tablaResultados');
+        tbody.style.display = 'flex';
         tbody.innerHTML = '';
         
-        data.resultados.forEach(resultado => {
-            const porcentaje = data.total_votos > 0 ? ((resultado.votos / data.total_votos) * 100).toFixed(1) : 0;
+        data.resultados.forEach((c, index) => {
+            const rank = index + 1;
+            const item = document.createElement('div');
+            item.className = `leaderboard-item rank-${rank}`;
             
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>
-                    <div class="dash-avatar-wrapper">
-                        <img src="${resultado.imagen_url}" class="dash-avatar" style="border-color: ${resultado.color};" onerror="this.onerror=null; this.src='assets/icons/user.svg';">
-                        <span class="dash-candidate-name">${resultado.nombre}</span>
+            const porcentaje = data.total_votos > 0 ? ((c.votos / data.total_votos) * 100).toFixed(1) : 0;
+            
+            item.innerHTML = `
+                <div class="lb-left">
+                    <div class="lb-rank">#${rank}</div>
+                    <img src="${c.imagen_url}" class="lb-avatar" alt="${c.nombre}" onerror="this.onerror=null; this.src='assets/icons/user.svg';">
+                    <div class="lb-details">
+                        <div class="lb-name">${c.nombre}</div>
+                        <div class="lb-meta">
+                            <span>Tarjetón #${c.id.toString().padStart(2, '0')}</span>
+                            <span class="lb-badge">${c.jornada}</span>
+                        </div>
                     </div>
-                </td>
-                <td>
-                    <span class="dash-candidate-num">#${resultado.numero_tarjeton}</span>
-                </td>
-                <td>
-                    <div class="dash-progress-header">
-                        <span class="dash-progress-text">${porcentaje}%</span>
+                </div>
+                <div class="lb-right">
+                    <div class="lb-votes">
+                        <div class="lb-votes-count">${c.votos}</div>
+                        <div class="lb-votes-label">Votos</div>
                     </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: ${porcentaje}%; background-color: ${resultado.color}"></div>
+                    <div class="lb-progress-wrapper">
+                        <div class="lb-progress-header">
+                            <span style="color: var(--text-muted)">Fuerza Electoral</span>
+                            <span style="color: var(--text-main); font-weight: 800;">${porcentaje}%</span>
+                        </div>
+                        <div class="lb-progress-bg">
+                            <div class="lb-progress-fill" style="width: 0%"></div>
+                        </div>
                     </div>
-                </td>
-                <td class="dash-td-center">
-                    <div class="dash-jornada-stats">
-                        <span class="dash-jornada-badge" title="Jornada ${resultado.jornada}">
-                            <img src="assets/icons/${resultado.jornada === 'Mañana' ? 'sun' : 'moon'}.svg" class="dash-jornada-icon"> ${resultado.jornada}
-                        </span>
-                    </div>
-                </td>
-                <td class="dash-total-votes">
-                    ${resultado.votos}
-                </td>
+                </div>
             `;
-            tbody.appendChild(tr);
+            
+            tbody.appendChild(item);
+            
+            setTimeout(() => {
+                const bar = item.querySelector('.lb-progress-fill');
+                if(bar) bar.style.width = `${porcentaje}%`;
+            }, 100);
         });
-        
     } catch (error) {
         console.error('Error:', error);
     } finally {
         document.getElementById('loader').style.display = 'none';
-        document.getElementById('tablaResultados').style.display = 'table';
+        document.getElementById('tablaResultados').style.display = 'flex';
     }
 }
 
-// Cargar inicialmente
+// Init
 cargarResultados();
 
-// Evento para el filtro
+// Filtro
 const filterElement = document.getElementById('jornadaDashboardFilter');
 if (filterElement) {
     filterElement.addEventListener('change', () => {
@@ -84,5 +92,5 @@ if (filterElement) {
     });
 }
 
-// Actualizar cada 5 segundos
-setInterval(cargarResultados, 5000);
+// Polling 10s o tiempo de carga 
+setInterval(cargarResultados, 10000);

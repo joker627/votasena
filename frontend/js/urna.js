@@ -2,14 +2,14 @@ const API_URL = 'http://127.0.0.1:8000/api/v1';
 
 let candidatoSeleccionado = null;
 
-// Referencias DOM
+// Nodos DOM
 const tarjeton = document.getElementById('tarjeton');
 const loader = document.getElementById('loader');
 const modal = document.getElementById('confirmModal');
 const successScreen = document.getElementById('successScreen');
 const jornadaSelect = document.getElementById('jornadaSelect');
 
-// Custom Select Logic
+// Selector
 const jornadaContainer = document.getElementById('jornadaSelectorContainer');
 const jornadaOptions = document.querySelectorAll('.custom-option');
 const jornadaSelectedText = document.getElementById('jornadaSelectedText');
@@ -42,7 +42,7 @@ if (jornadaContainer) {
     });
 }
 
-// Cargar candidatos desde la API
+// Fetch API
 async function cargarCandidatos() {
     const jornada = jornadaSelect.value;
     try {
@@ -63,10 +63,10 @@ async function cargarCandidatos() {
     }
 }
 
-// Recargar cuando cambie la jornada
+// Filtro
 jornadaSelect.addEventListener('change', cargarCandidatos);
 
-// Cargar al iniciar
+// Init
 document.addEventListener('DOMContentLoaded', cargarCandidatos);
 
 function renderizarCandidatos(candidatos) {
@@ -76,16 +76,14 @@ function renderizarCandidatos(candidatos) {
     candidatos.forEach(candidato => {
         const card = document.createElement('div');
         card.className = 'candidato-card';
-        card.style.setProperty('--candidato-color', candidato.color);
         card.onclick = () => abrirModal(candidato);
 
         card.innerHTML = `
             <div class="card-image-wrapper">
-                <div class="card-color-backdrop" style="background-color: ${candidato.color}20;"></div>
-                <img src="${candidato.imagen_url}" alt="${candidato.nombre}" class="candidato-img" style="border-color: ${candidato.color}" onerror="this.onerror=null; this.src='assets/icons/user.svg';">
+                <img src="${candidato.imagen_url}" alt="${candidato.nombre}" class="candidato-img" onerror="this.onerror=null; this.src='assets/icons/user.svg';">
             </div>
             <div class="candidato-info">
-                <div class="candidato-badge" style="color: ${candidato.color}; background-color: ${candidato.color}15; border-color: ${candidato.color}30;">
+                <div class="candidato-badge">
                     Tarjetón #${candidato.numero_tarjeton}
                 </div>
                 <h3 class="candidato-nombre">${candidato.nombre}</h3>
@@ -125,7 +123,7 @@ async function enviarVoto() {
 
         if (!response.ok) throw new Error('Error al registrar el voto');
         
-        // Cerrar modal y mostrar éxito
+        // Éxito
         cerrarModal();
         mostrarExito();
 
@@ -140,7 +138,7 @@ function mostrarExito() {
     const successScreen = document.getElementById('successScreen');
     successScreen.classList.add('active');
 
-    // Reinicio automático a los 3 segundos
+    // Reset 3s
     setTimeout(() => {
         successScreen.classList.remove('active');
     }, 3000);

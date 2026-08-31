@@ -13,23 +13,29 @@
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
 
-    <img src="assets/logo.png" alt="SENA Logo" class="logo-header">
-    <div class="urna-header-titles">
-        <h1 class="urna-main-title">TARJETÓN ELECTORAL SENA</h1>
-        <p class="urna-subtitle">Selecciona a tu candidato preferido o la opción de voto en blanco haciendo clic sobre su tarjeta correspondiente.</p>
-    </div>
-    
-    <div class="jornada-selector" tabindex="0" id="jornadaSelectorContainer">
-        <span class="jornada-label">Jornada:</span>
-        <div class="custom-select">
-            <span id="jornadaSelectedText">Mañana</span>
-            <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    <header class="urna-top-header">
+        <div class="urna-header-left">
+            <img src="assets/logo.png" alt="SENA Logo" class="urna-logo">
+            <div class="urna-header-text">
+                <h1 class="urna-main-title">TARJETÓN ELECTORAL SENA</h1>
+                <p class="urna-subtitle">Elección de Representantes</p>
+            </div>
         </div>
-        <div class="custom-options" id="jornadaOptions">
-            <div class="custom-option selected" data-value="Mañana">Mañana</div>
-            <div class="custom-option" data-value="Tarde">Tarde</div>
+        
+        <div class="urna-header-right">
+            <div class="jornada-selector" tabindex="0" id="jornadaSelectorContainer">
+                <span class="jornada-label">Jornada:</span>
+                <div class="custom-select">
+                    <span id="jornadaSelectedText">Mañana</span>
+                    <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+                <div class="custom-options" id="jornadaOptions">
+                    <div class="custom-option selected" data-value="Mañana">Mañana</div>
+                    <div class="custom-option" data-value="Tarde">Tarde</div>
+                </div>
+            </div>
         </div>
-    </div>
+    </header>
     <input type="hidden" id="jornadaSelect" value="Mañana">
     
     <div class="container">
