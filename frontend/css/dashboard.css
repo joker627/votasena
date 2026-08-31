@@ -170,7 +170,7 @@
   
   .main-content, .sidebar.collapsed ~ .main-content { margin-left: 0; width: 100%; padding: 1rem; }
   
-  .toggle-desktop { display: none; }
+  .toggle-desktop { display: flex; }
   .toggle-mobile { display: flex; }
   .header-right .mobile-logo { display: block; }
 }
