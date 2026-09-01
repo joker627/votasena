@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-# Cargar variables del archivo .env usando ruta absoluta
+# Cargar variables de entorno 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 env_path = os.path.join(BASE_DIR, '.env')
 load_dotenv(dotenv_path=env_path)
