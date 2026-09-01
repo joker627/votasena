@@ -11,6 +11,8 @@ Asegúrate de tener instalado en tu computadora:
 2. **MySQL Server** (Base de datos en ejecución).
 3. **Git** (Opcional, para clonar el repositorio).
 
+4 **Crear archivo .ENV en la raíz del backend ya que ahí se tomarán las credenciales **
+
 ---
 
 ## 🛠️ Manual de Instalación Paso a Paso
