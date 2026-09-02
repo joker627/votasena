@@ -11,7 +11,11 @@ app = FastAPI(title="VotaSena API", version="1.0")
 # --- Middleware CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://127.0.0.1:7000",
+        "http://localhost:7000",
+        "https://votasena.pages.dev"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
