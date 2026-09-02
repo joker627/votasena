@@ -1,14 +1,19 @@
-from fastapi import APIRouter, HTTPException
+# ==============================================================================
+# MÓDULO: Gestión y Consulta de Candidatos
+# ==============================================================================
+
 from typing import List
+import pymysql
+from fastapi import APIRouter, HTTPException
 from app.core.database import get_db_connection
 from app.models import schemas
-import pymysql
 
 router = APIRouter(
     prefix="/candidatos",
     tags=["candidatos"]
 )
 
+# --- Endpoints ---
 @router.get("/", response_model=List[schemas.Candidato])
 def obtener_candidatos(jornada: str = None):
     try:
@@ -21,8 +26,7 @@ def obtener_candidatos(jornada: str = None):
                 cursor.execute("SELECT * FROM candidatos WHERE jornada = %s", (jornada,))
             else:
                 cursor.execute("SELECT * FROM candidatos")
-            candidatos = cursor.fetchall()
-            return candidatos
+            return cursor.fetchall()
     finally:
         if conn:
             conn.close()

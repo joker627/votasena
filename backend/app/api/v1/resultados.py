@@ -1,13 +1,19 @@
-from fastapi import APIRouter, HTTPException
+# ==============================================================================
+# MÓDULO: Consolidación y Cálculo de Resultados Electorales
+# ==============================================================================
+
+from fastapi import APIRouter, HTTPException, Depends
 from app.core.database import get_db_connection
+from app.api.v1.auth import get_current_admin
 
 router = APIRouter(
     prefix="/resultados",
     tags=["resultados"]
 )
 
+# --- Endpoints ---
 @router.get("/")
-def get_resultados(jornada: str = None):
+def get_resultados(jornada: str = None, admin: dict = Depends(get_current_admin)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="Error de conexión a la base de datos")
@@ -40,6 +46,11 @@ def get_resultados(jornada: str = None):
             resultados = cursor.fetchall()
                 
             total_votos = sum(r['votos'] for r in resultados)
+            
+            # Cálculo de porcentajes y formato de tarjetón
+            for r in resultados:
+                r['porcentaje'] = round((r['votos'] / total_votos) * 100, 1) if total_votos > 0 else 0.0
+                r['tarjeton_formateado'] = f"{str(r['numero_tarjeton']).zfill(2)}"
             
             return {
                 "total_votos": total_votos,

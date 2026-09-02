@@ -23,8 +23,12 @@ Sigue estos pasos en orden para levantar el proyecto desde cero en tu máquina l
 
 1. Abre tu gestor de base de datos preferido (phpMyAdmin, DBeaver, MySQL Workbench, etc.).
 2. Crea una base de datos vacía. Por defecto, el sistema intentará conectarse a una base de datos llamada `votasena`.
-3. Importa el archivo `database.sql` (ubicado en `backend/database.sql`) para crear las tablas necesarias (`candidatos`, `votos`).
+3. Importa el archivo `database.sql` (ubicado en `backend/database.sql`) para crear las tablas necesarias (`candidatos`, `votos`, `credenciales`).
 4. Revisa el archivo de configuración `backend/app/core/database.py` o tu archivo `.env` para asegurarte de que las credenciales coincidan con las de tu equipo local (usuario por defecto: `root`, sin contraseña).
+
+> **IMPORTANTE:** El archivo `database.sql` ya incluye dos contraseñas por defecto (encriptadas en Bcrypt) en la tabla `credenciales`:
+> - Para votar (Urna): `votar2026`
+> - Para el Dashboard (Admin): `admin2026`
 
 ### Paso 2: Preparar y Levantar el Backend (API)
 
@@ -47,11 +51,11 @@ El backend procesa la lógica de los votos, la conexión a MySQL y la generació
      source venv/bin/activate
      ```
 
-3. Instala todas las dependencias exactas desde el archivo de requerimientos:
+4. Instala todas las dependencias exactas desde el archivo de requerimientos:
    ```bash
    pip install -r requirements.txt
    ```
-   *(Esto instalará `fastapi`, `uvicorn`, `pymysql`, `openpyxl`, `fpdf2`, entre otras).*
+   *(Esto instalará `fastapi`, `uvicorn`, `pymysql`, `bcrypt`, `openpyxl`, `fpdf2`, entre otras).*
 
 4. Inicia el servidor de desarrollo del backend:
    ```bash
@@ -87,3 +91,18 @@ El frontend contiene la Urna Virtual donde se vota y el Dashboard Analítico de 
   *Panel de control en vivo para ver resultados filtrados y exportar reportes.*
 
 > **Nota de Seguridad:** Asegúrate de que las pantallas donde se muestra el Dashboard no sean accesibles para los votantes, ya que muestran los resultados en tiempo real.
+
+---
+
+## 🔐 Seguridad y Hashes (Bcrypt)
+
+Este sistema utiliza **Bcrypt** para encriptar unidireccionalmente todas las contraseñas.
+Si olvidas las contraseñas o necesitas insertar una directamente en la base de datos (PHPMyAdmin/MySQL Workbench), **NUNCA** debes escribirla en texto plano porque el sistema la rechazará.
+
+Para generar un código compatible, utiliza la herramienta externa incluida:
+1. Abre una terminal en la carpeta principal `C:\votasena`
+2. Ejecuta:
+   ```bash
+   python generar_hash.py
+   ```
+3. Escribe la contraseña que desees y pega la cadena gigante (ejemplo `$2b$12$...`) en la columna `codigo_hash` de la tabla `credenciales`.

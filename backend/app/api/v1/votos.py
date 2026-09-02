@@ -1,27 +1,34 @@
-from fastapi import APIRouter, HTTPException, status
+# ==============================================================================
+# MÓDULO: Registro y Procesamiento de Votos
+# ==============================================================================
+
+from fastapi import APIRouter, HTTPException, status, Depends
 from app.core.database import get_db_connection
 from app.models.schemas import VotoCreate
+from app.api.v1.auth import get_current_voter
 
 router = APIRouter(
     prefix="/votar",
     tags=["votos"]
 )
 
+# --- Endpoints ---
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def registrar_voto(voto: VotoCreate):
+def registrar_voto(voto: VotoCreate, voter: dict = Depends(get_current_voter)):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="Error de conexión a la base de datos")
     
     try:
         with conn.cursor() as cursor:
-            # Verificar si el candidato existe
             cursor.execute("SELECT id FROM candidatos WHERE id = %s", (voto.candidato_id,))
             if not cursor.fetchone():
                 raise HTTPException(status_code=404, detail="Candidato no encontrado")
             
-            # Registrar el voto
-            cursor.execute("INSERT INTO votos (candidato_id, jornada) VALUES (%s, %s)", (voto.candidato_id, voto.jornada.value))
+            cursor.execute(
+                "INSERT INTO votos (candidato_id, jornada) VALUES (%s, %s)",
+                (voto.candidato_id, voto.jornada.value)
+            )
             conn.commit()
             return {"mensaje": "Voto registrado correctamente"}
     except Exception as e:

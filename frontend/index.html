@@ -4,13 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Analítica - VotaSena</title>
+    <meta name="description" content="Panel administrativo de resultados electorales VotaSena.">
     <link rel="icon" type="image/png" href="assets/logo.png">
-    <link rel="stylesheet" href="css/global.css?v=3">
-    <link rel="stylesheet" href="css/dashboard.css?v=3">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body class="admin-layout">
 
-    <!-- Sidebar -->
+    <!-- MÓDULO: Autenticación -->
+    <auth-modal
+        modal-title="Acceso al Dashboard"
+        modal-desc="Ingresa el código de administrador para ver las estadísticas."
+        placeholder="Código de administrador">
+    </auth-modal>
+
+    <!-- MÓDULO: Barra Lateral -->
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-brand">
@@ -18,17 +26,16 @@
                 <h2 class="sidebar-title">VotaSena</h2>
             </div>
             <button id="sidebarToggleBtn" class="toggle-btn toggle-desktop" title="Alternar Menú">
-                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                <img src="assets/icons/menu.svg" class="icon-btn" alt="Menú">
             </button>
         </div>
         <nav class="sidebar-nav">
-            <a href="#" class="nav-item active" title="Dashboard Analítica">
+            <a href="index.html" id="navDashboard" class="nav-item active">
                 <img src="assets/icons/dashboard.svg" class="icon" alt="">
                 <span class="nav-text">Dashboard Analítica</span>
             </a>
             <div class="divider"></div>
-            <!-- Abre la urna en otra pestaña por seguridad -->
-            <a href="urna.html" target="_blank" class="nav-item btn-open-urna" title="Abrir Urna">
+            <a href="urna.html" target="_blank" class="nav-item btn-open-urna">
                 <img src="assets/icons/urna.svg" class="icon" alt="">
                 <span class="nav-text">Abrir Urna</span>
             </a>
@@ -38,13 +45,13 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
+    <!-- MÓDULO: Contenido Principal -->
     <main class="main-content">
-        <!-- Top Header -->
+
         <header class="top-header">
             <div class="header-left">
                 <button id="mobileToggleBtn" class="toggle-btn toggle-mobile" title="Alternar Menú">
-                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    <img src="assets/icons/menu.svg" class="icon-btn" alt="Menú">
                 </button>
                 <h1 class="panel-title">Dashboard Analítico</h1>
             </div>
@@ -53,83 +60,86 @@
             </div>
         </header>
 
-        <!-- Widgets de Resumen -->
+        <!-- MÓDULO: Métricas -->
         <div class="widgets-grid">
             <div class="widget-card">
                 <div class="widget-icon primary-bg">
-                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <img src="assets/icons/users.svg" class="icon-widget" alt="Candidatos">
                 </div>
                 <div class="widget-info">
                     <h3 class="widget-title">Candidatos</h3>
                     <p class="widget-value" id="widgetTotalCandidatos">0</p>
                 </div>
             </div>
-            
+
             <div class="widget-card">
                 <div class="widget-icon secondary-bg">
-                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <img src="assets/icons/check-circle.svg" class="icon-widget" alt="Votos">
                 </div>
                 <div class="widget-info">
                     <h3 class="widget-title">Votos Emitidos</h3>
                     <p class="widget-value" id="widgetTotalVotos">0</p>
                 </div>
             </div>
+
+            <div class="widget-card widget-code">
+                <div class="widget-code-left">
+                    <div class="widget-icon dark-bg">
+                        <img src="assets/icons/lock.svg" class="icon-widget" alt="Código">
+                    </div>
+                    <div class="widget-code-info">
+                        <h3 class="widget-title">Código de Urna Actual</h3>
+                        <p class="widget-code-desc">Cambie el código de acceso para los votantes</p>
+                    </div>
+                </div>
+                <div class="widget-code-right">
+                    <input type="password" id="voterCodeInput" class="code-input" placeholder="Cambiar código...">
+                    <button onclick="cambiarCodigoVotante()" class="code-btn">Cambiar</button>
+                </div>
+            </div>
         </div>
-        
-        <div class="container panel-container">
+
+        <!-- MÓDULO: Resultados -->
+        <div class="panel-container">
             <div class="panel-header">
-                <h2 class="panel-subtitle">Conteo en Vivo</h2>
+                <div class="panel-header-left">
+                    <h2 class="panel-subtitle">Conteo en Vivo</h2>
+                    <span id="countdownTimer" class="countdown-timer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        Actualizando en 60s
+                    </span>
+                    <button id="toggleLiveUpdateBtn" class="toggle-btn live-toggle-btn" title="Pausar actualización en vivo">
+                        <img src="assets/icons/pause.svg" id="liveUpdateIcon" class="icon-btn" alt="Pausar">
+                    </button>
+                </div>
                 <div class="panel-actions">
                     <select id="jornadaDashboardFilter" class="jornada-dashboard-selector">
                         <option value="Todas">Todas las Jornadas</option>
                         <option value="Mañana">Jornada Mañana</option>
                         <option value="Tarde">Jornada Tarde</option>
                     </select>
-                    <a href="http://127.0.0.1:8000/api/v1/exportar/excel" id="btnExportExcel" class="nav-item btn-excel">
+                    <a href="javascript:void(0)" id="btnExportExcel" class="nav-item btn-excel">
                         <img src="assets/icons/excel.svg" class="icon" alt="">
-                        Excel
+                        <span>Excel</span>
                     </a>
-                    <a href="http://127.0.0.1:8000/api/v1/exportar/pdf" id="btnExportPdf" class="nav-item btn-pdf">
+                    <a href="javascript:void(0)" id="btnExportPdf" class="nav-item btn-pdf">
                         <img src="assets/icons/pdf.svg" class="icon" alt="">
-                        PDF
+                        <span>PDF</span>
                     </a>
-                    <div class="total-votes">
-                        Total Votos: <span id="totalVotos" class="total-votes-count">0</span>
-                    </div>
                 </div>
             </div>
 
-            <div id="loader" class="loader" style="margin: 3rem auto;"></div>
-            <div id="tablaResultados" class="leaderboard-list" style="display: none;">
-                <!-- Resultados inyectados por JS -->
+            <div id="loader" class="loader"></div>
+            <div id="tablaResultados" class="resultados-wrapper hidden-results">
+                <div id="podiumContainer" class="podium-container"></div>
+                <div id="listaResto" class="lista-resto"></div>
             </div>
         </div>
+
     </main>
 
-    <script>
-        // Lógica del Menú Desktop & Mobile
-        const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
-        const mobileToggleBtn = document.getElementById('mobileToggleBtn');
-        const sidebar = document.querySelector('.sidebar');
-        
-        // Cargar estado desde localStorage
-        if (localStorage.getItem('sidebarCollapsed') === 'true') {
-            sidebar.classList.add('collapsed');
-        }
-
-        const toggleSidebar = () => {
-            // En pantallas pequeñas funciona como menú móvil, en grandes colapsa
-            if (window.innerWidth <= 1024) {
-                sidebar.classList.toggle('active');
-            } else {
-                sidebar.classList.toggle('collapsed');
-                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-            }
-        };
-
-        if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', toggleSidebar);
-        if (mobileToggleBtn) mobileToggleBtn.addEventListener('click', toggleSidebar);
-    </script>
+    <script src="js/auth-modal.js"></script>
+    <script src="js/sidebar.js"></script>
     <script src="js/dashboard.js"></script>
 </body>
 </html>

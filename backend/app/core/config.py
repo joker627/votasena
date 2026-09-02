@@ -1,13 +1,18 @@
+# ==============================================================================
+# MÓDULO: Configuración del Sistema y Variables de Entorno
+# ==============================================================================
+
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-# Cargar variables de entorno 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-env_path = os.path.join(BASE_DIR, '.env')
-load_dotenv(dotenv_path=env_path)
+# --- Carga de .env ---
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
+# --- Parámetros de Configuración ---
 class Settings:
     DB_HOST = os.getenv("DB_HOST", "localhost")
+    DB_PORT = int(os.getenv("DB_PORT", 3306))
     DB_USER = os.getenv("DB_USER", "root")
     DB_PASSWORD = os.getenv("DB_PASSWORD", "")
     DB_NAME = os.getenv("DB_NAME", "votasena")
