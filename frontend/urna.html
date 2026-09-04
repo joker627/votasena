@@ -10,7 +10,7 @@
 </head>
 <body>
 
-    <!-- MÓDULO: Autenticación -->
+    <!-- MODULO: Autenticacion -->
     <auth-modal
         modal-title="Acceso a la Urna"
         modal-desc="Pídale al administrador que ingrese el código de votante para continuar."
@@ -35,7 +35,7 @@
                 <span class="jornada-label">Jornada:</span>
                 <div class="custom-select">
                     <span id="jornadaSelectedText">Mañana</span>
-                    <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    <img src="assets/icons/chevron-down.svg" class="chevron-icon" width="16" height="16" alt="">
                 </div>
                 <div class="custom-options" id="jornadaOptions">
                     <div class="custom-option selected" data-value="Mañana">Mañana</div>
@@ -47,13 +47,13 @@
 
     <input type="hidden" id="jornadaSelect" value="Mañana">
 
-    <!-- MÓDULO: Tarjetón Electoral -->
+    <!-- MODULO: Tarjeton Electoral -->
     <div class="container">
         <div id="loader" class="loader"></div>
         <div id="tarjeton" class="candidatos-grid" style="display:none;"></div>
     </div>
 
-    <!-- MÓDULO: Confirmación de Voto -->
+    <!-- MODULO: Confirmacion de Voto -->
     <div class="modal-overlay" id="confirmModal">
         <div class="modal-content">
             <h2>¿Confirmas tu voto?</h2>
@@ -63,18 +63,22 @@
             </div>
             <div class="modal-buttons">
                 <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
-                <button class="btn-confirm" onclick="enviarVoto()">Sí, Votar</button>
+                <button id="btnConfirmVote" class="btn-confirm" onclick="enviarVoto()">Sí, Votar</button>
             </div>
         </div>
     </div>
 
-    <!-- MÓDULO: Notificación de Éxito -->
-    <div class="success-screen" id="successScreen">
-        <div class="success-icon">✓</div>
-        <h1>¡Voto Registrado!</h1>
-        <p class="success-text">Gracias por participar. La pantalla se limpiará sola...</p>
+    <!-- MODULO: Notificacion de Exito -->
+    <div class="modal-overlay" id="successScreen">
+        <div class="modal-content success-modal">
+                <img src="assets/icons/check-success.svg" class="success-check-img" width="80" height="80" alt="Voto registrado">
+            <h2 class="success-title">¡Voto Registrado!</h2>
+            <p class="success-subtitle">Gracias por participar en esta elección.</p>
+            <div class="success-progress-bar"><div class="success-progress-fill" id="successProgressFill"></div></div>
+        </div>
     </div>
 
+    <script src="js/toast.js"></script>
     <script src="js/auth-modal.js"></script>
     <script src="js/urna.js"></script>
 </body>

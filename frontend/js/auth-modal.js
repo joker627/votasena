@@ -1,5 +1,5 @@
 /* ==========================================================================
-   COMPONENTE: Modal de Autenticación Reutilizable
+   COMPONENTE: Modal de Autenticacion Reutilizable
    ========================================================================== */
 
 class AuthModal extends HTMLElement {
@@ -15,7 +15,6 @@ class AuthModal extends HTMLElement {
                     <p class="auth-desc">${desc}</p>
                     <input type="password" id="authInput" class="auth-input" placeholder="${placeholder}">
                     <button class="auth-btn" id="authSubmitBtn">Ingresar</button>
-                    <p class="auth-error" id="authError">Código incorrecto. Inténtalo de nuevo.</p>
                 </div>
             </div>
         `;
@@ -23,12 +22,27 @@ class AuthModal extends HTMLElement {
         const input = this.querySelector('#authInput');
         const btn   = this.querySelector('#authSubmitBtn');
 
+        const setLoading = (loading) => {
+            btn.disabled = loading;
+            btn.innerHTML = loading
+                ? `<span class="auth-btn-spinner"></span> Verificando...`
+                : 'Ingresar';
+        };
+
         const dispatch = () => {
+            if (!input.value.trim()) return;
+            setLoading(true);
             this.dispatchEvent(new CustomEvent('auth-submit', {
                 bubbles: true,
                 detail: { code: input.value.trim() }
             }));
         };
+
+        // Resetear boton cuando la autenticacion termina 
+        document.addEventListener('auth-done', () => setLoading(false), { once: false });
+
+        // Limpiar el campo de entrada
+        document.addEventListener('auth-clear', () => { input.value = ''; });
 
         btn.addEventListener('click', dispatch);
         input.addEventListener('keypress', (e) => { if (e.key === 'Enter') dispatch(); });

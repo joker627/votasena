@@ -11,14 +11,29 @@
 </head>
 <body class="admin-layout">
 
-    <!-- MÓDULO: Autenticación -->
+    <!-- Dialogo de confirmacion de cierre de sesion -->
+    <div class="confirm-overlay" id="confirmLogoutOverlay">
+        <div class="confirm-dialog">
+            <div class="confirm-icon">
+                <img src="assets/icons/logout.svg" alt="">
+            </div>
+            <p class="confirm-title" id="confirmLogoutTitle">Cerrar sesion</p>
+            <p class="confirm-desc" id="confirmLogoutDesc">Esta accion cerrara la sesion activa.</p>
+            <div class="confirm-actions">
+                <button class="confirm-btn confirm-btn-cancel" id="confirmLogoutCancel">Cancelar</button>
+                <button class="confirm-btn confirm-btn-confirm" id="confirmLogoutOk">Si, cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODULO: Autenticacion -->
     <auth-modal
         modal-title="Acceso al Dashboard"
         modal-desc="Ingresa el código de administrador para ver las estadísticas."
         placeholder="Código de administrador">
     </auth-modal>
 
-    <!-- MÓDULO: Barra Lateral -->
+    <!-- MODULO: Barra Lateral -->
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-brand">
@@ -41,11 +56,23 @@
             </a>
         </nav>
         <div class="sidebar-footer">
+            <div class="logout-dropdown" id="logoutDropdownSidebar">
+                <button class="btn-logout" id="btnLogoutTriggerSidebar">
+                    <img src="assets/icons/logout.svg" class="icon" alt="">
+                    <span class="nav-text">Cerrar sesion</span>
+                </button>
+                <div class="logout-menu" id="logoutMenuSidebar">
+                    <button class="logout-option" data-action="urna">Solo urna</button>
+                    <button class="logout-option" data-action="admin">Solo admin</button>
+                    <div class="logout-divider"></div>
+                    <button class="logout-option logout-option--all" data-action="all">Cerrar todo</button>
+                </div>
+            </div>
             <small>Sistema Institucional</small>
         </div>
     </aside>
 
-    <!-- MÓDULO: Contenido Principal -->
+    <!-- MODULO: Contenido Principal -->
     <main class="main-content">
 
         <header class="top-header">
@@ -56,11 +83,23 @@
                 <h1 class="panel-title">Dashboard Analítico</h1>
             </div>
             <div class="header-right">
+                <div class="logout-dropdown" id="logoutDropdownHeader">
+                    <button class="btn-logout-header" id="btnLogoutTriggerHeader" title="Cerrar sesiones">
+                        <img src="assets/icons/logout.svg" width="18" height="18" alt="">
+                        <span>Cerrar sesion</span>
+                    </button>
+                    <div class="logout-menu logout-menu--right" id="logoutMenuHeader">
+                        <button class="logout-option" data-action="urna">Solo urna</button>
+                        <button class="logout-option" data-action="admin">Solo admin</button>
+                        <div class="logout-divider"></div>
+                        <button class="logout-option logout-option--all" data-action="all">Cerrar todo</button>
+                    </div>
+                </div>
                 <img src="assets/logo.png" alt="SENA Logo" class="mobile-logo">
             </div>
         </header>
 
-        <!-- MÓDULO: Métricas -->
+        <!-- MODULO: Metricas -->
         <div class="widgets-grid">
             <div class="widget-card">
                 <div class="widget-icon primary-bg">
@@ -99,13 +138,13 @@
             </div>
         </div>
 
-        <!-- MÓDULO: Resultados -->
+        <!-- MODULO: Resultados -->
         <div class="panel-container">
             <div class="panel-header">
                 <div class="panel-header-left">
                     <h2 class="panel-subtitle">Conteo en Vivo</h2>
                     <span id="countdownTimer" class="countdown-timer">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <img src="assets/icons/clock-white.svg" width="16" height="16" alt="">
                         Actualizando en 60s
                     </span>
                     <button id="toggleLiveUpdateBtn" class="toggle-btn live-toggle-btn" title="Pausar actualización en vivo">
@@ -138,6 +177,7 @@
 
     </main>
 
+    <script src="js/toast.js"></script>
     <script src="js/auth-modal.js"></script>
     <script src="js/sidebar.js"></script>
     <script src="js/dashboard.js"></script>

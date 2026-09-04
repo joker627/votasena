@@ -13,7 +13,6 @@ class JornadaEnum(str, Enum):
 # --- Esquemas de Votación ---
 class VotoCreate(BaseModel):
     candidato_id: int
-    jornada: JornadaEnum
 
 # --- Esquemas de Candidatos ---
 class Candidato(BaseModel):

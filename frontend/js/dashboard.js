@@ -1,8 +1,9 @@
 /* ==========================================================================
-   MÓDULO: Dashboard Analítico
+   MODULO: Dashboard Analitico
    ========================================================================== */
 
-const API_URL = 'http://127.0.0.1:8000/api/v1';
+const API_URL = 'https://votasena.vercel.app/api/v1';
+
 
 /* --- Estado Global --- */
 let adminAcceso = false;
@@ -12,13 +13,10 @@ let secondsLeft = 60;
 let isLiveUpdateEnabled = true;
 
 const authScreen = () => document.getElementById('authScreen');
-const authError  = () => document.getElementById('authError');
 
-/* --- Autenticación --- */
+/* --- Autenticacion --- */
 async function verificarAcceso(code) {
     if (!code) return;
-    
-    if (authError()) authError().style.display = 'none';
 
     try {
         const response = await fetch(`${API_URL}/auth/verificar`, {
@@ -32,18 +30,20 @@ async function verificarAcceso(code) {
             adminAcceso = true;
             adminToken = data.token;
             localStorage.setItem('adminToken', adminToken);
+            showToast('Acceso concedido. Bienvenido al dashboard.', 'success');
+            document.dispatchEvent(new Event('auth-clear'));
             authScreen().classList.add('hidden');
             await cargarEstadoLiveUpdate();
             cargarResultados();
         } else {
-            authError().style.display = 'block';
+            showToast('Código incorrecto. Inténtalo de nuevo.', 'error');
             localStorage.removeItem('adminToken');
-            authScreen().classList.remove('hidden');
         }
     } catch (e) {
         console.error(e);
-        alert('Error conectando al servidor.');
-        authScreen().classList.remove('hidden');
+        showToast('Error conectando al servidor.', 'error');
+    } finally {
+        document.dispatchEvent(new Event('auth-done'));
     }
 }
 
@@ -88,14 +88,14 @@ function actualizarTextoCountdown() {
         cd.style.background = 'var(--secondary)';
         cd.style.boxShadow = '0 4px 12px rgba(255, 108, 0, 0.3)';
         cd.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <img src="assets/icons/clock-white.svg" width="16" height="16" alt="">
             Actualizando en ${secondsLeft}s
         `;
     } else {
         cd.style.background = 'var(--text-muted)';
         cd.style.boxShadow = 'none';
         cd.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+            <img src="assets/icons/pause-white.svg" width="16" height="16" alt="">
             Pausado
         `;
     }
@@ -127,7 +127,7 @@ async function cargarEstadoLiveUpdate() {
     }
 }
 
-/* --- Control de Actualización --- */
+/* --- Control de Actualizacion --- */
 const toggleLiveUpdateBtn = document.getElementById('toggleLiveUpdateBtn');
 const liveUpdateIcon      = document.getElementById('liveUpdateIcon');
 if (toggleLiveUpdateBtn) {
@@ -160,7 +160,7 @@ if (toggleLiveUpdateBtn) {
     });
 }
 
-/* --- Gestión de Clave de Urna --- */
+/* --- Gestion de Clave de Urna --- */
 async function cambiarCodigoVotante() {
     const input = document.getElementById('voterCodeInput');
     const newCode = input.value.trim();
@@ -181,14 +181,14 @@ async function cambiarCodigoVotante() {
         });
 
         if (response.ok) {
-            alert('Código de votante actualizado exitosamente.');
+            showToast('Código de votante actualizado exitosamente.', 'success');
             input.value = '';
         } else {
-            alert('Error al actualizar el código.');
+            showToast('Error al actualizar el código.', 'error');
         }
     } catch (e) {
         console.error(e);
-        alert('Error conectando al servidor.');
+        showToast('Error conectando al servidor.', 'error');
     }
 }
 
@@ -310,7 +310,7 @@ async function cargarResultados() {
     }
 }
 
-/* --- Filtros y Navegación --- */
+/* --- Filtros y Navegacion --- */
 const filterElement = document.getElementById('jornadaDashboardFilter');
 if (filterElement) {
     filterElement.addEventListener('change', () => {
@@ -329,7 +329,7 @@ if (navDashboard) {
     });
 }
 
-/* --- Exportación de Reportes --- */
+/* --- Exportacion de Reportes --- */
 async function descargarExport(endpoint, filename) {
     if (!adminAcceso) return;
     const filter = document.getElementById('jornadaDashboardFilter');
@@ -354,7 +354,7 @@ async function descargarExport(endpoint, filename) {
         window.URL.revokeObjectURL(url);
     } catch (err) {
         console.error(err);
-        alert("Error descargando el archivo");
+        showToast("Error descargando el archivo", 'error');
     }
 }
 
@@ -366,4 +366,96 @@ document.getElementById('btnExportExcel')?.addEventListener('click', (e) => {
 document.getElementById('btnExportPdf')?.addEventListener('click', (e) => {
     e.preventDefault();
     descargarExport('pdf', 'Resultados_VotaSena.pdf');
+});
+
+/* --- Cierre de Sesiones --- */
+function cerrarSesion(tipo) {
+    if (tipo === 'urna' || tipo === 'all') {
+        localStorage.removeItem('votoToken');
+    }
+    if (tipo === 'admin' || tipo === 'all') {
+        localStorage.removeItem('adminToken');
+        adminAcceso = false;
+        adminToken  = '';
+        if (countdownInterval) clearInterval(countdownInterval);
+    }
+
+    const mensajes = {
+        urna:  'Sesion de urna cerrada.',
+        admin: 'Sesion de administrador cerrada.',
+        all:   'Todas las sesiones cerradas.'
+    };
+    showToast(mensajes[tipo], 'info');
+
+    if (tipo === 'admin' || tipo === 'all') {
+        setTimeout(() => location.reload(), 1200);
+    }
+}
+
+// Logica del dropdown de logout
+function setupLogoutDropdown(triggerId, menuId) {
+    const trigger = document.getElementById(triggerId);
+    const menu    = document.getElementById(menuId);
+    if (!trigger || !menu) return;
+
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menu.classList.toggle('open');
+    });
+
+    menu.querySelectorAll('.logout-option').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menu.classList.remove('open');
+            mostrarConfirmLogout(btn.dataset.action);
+        });
+    });
+}
+
+setupLogoutDropdown('btnLogoutTriggerSidebar', 'logoutMenuSidebar');
+setupLogoutDropdown('btnLogoutTriggerHeader',  'logoutMenuHeader');
+
+document.addEventListener('click', () => {
+    document.querySelectorAll('.logout-menu.open')
+        .forEach(m => m.classList.remove('open'));
+});
+
+// Dialogo de confirmacion
+const confirmOverlay = document.getElementById('confirmLogoutOverlay');
+const confirmTitle   = document.getElementById('confirmLogoutTitle');
+const confirmDesc    = document.getElementById('confirmLogoutDesc');
+const confirmOk      = document.getElementById('confirmLogoutOk');
+const confirmCancel  = document.getElementById('confirmLogoutCancel');
+let pendingLogoutAction = null;
+
+const textos = {
+    urna:  { title: 'Cerrar sesion de urna',  desc: 'Los votantes actuales tendran que autenticarse de nuevo. El dashboard seguira activo.' },
+    admin: { title: 'Cerrar sesion de admin', desc: 'Seras redirigido al inicio de sesion. La urna seguira activa.' },
+    all:   { title: 'Cerrar todas las sesiones', desc: 'Tanto la urna como el dashboard cerraran sesion al instante.' }
+};
+
+function mostrarConfirmLogout(tipo) {
+    pendingLogoutAction = tipo;
+    confirmTitle.textContent = textos[tipo].title;
+    confirmDesc.textContent  = textos[tipo].desc;
+    confirmOverlay.classList.add('open');
+}
+
+function cerrarConfirmLogout() {
+    confirmOverlay.classList.remove('open');
+    pendingLogoutAction = null;
+}
+
+confirmCancel.addEventListener('click', cerrarConfirmLogout);
+confirmOverlay.addEventListener('click', (e) => {
+    if (e.target === confirmOverlay) cerrarConfirmLogout();
+});
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') cerrarConfirmLogout();
+});
+
+confirmOk.addEventListener('click', () => {
+    const tipo = pendingLogoutAction;
+    cerrarConfirmLogout();
+    if (tipo) cerrarSesion(tipo);
 });

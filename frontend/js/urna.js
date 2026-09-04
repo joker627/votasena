@@ -1,8 +1,8 @@
 /* ==========================================================================
-   MÓDULO: Urna Virtual
+   MODULO: Urna Virtual
    ========================================================================== */
 
-const API_URL = 'http://127.0.0.1:8000/api/v1';
+const API_URL = 'https://votasena.vercel.app/api/v1';
 
 /* --- Estado Global y Nodos DOM --- */
 let candidatoSeleccionado = null;
@@ -17,7 +17,6 @@ const jornadaOptions    = document.querySelectorAll('.custom-option');
 const jornadaSelectedText = document.getElementById('jornadaSelectedText');
 
 const authScreen = () => document.getElementById('authScreen');
-const authError  = () => document.getElementById('authError');
 
 /* --- Selector de Jornada --- */
 if (jornadaContainer) {
@@ -62,7 +61,7 @@ async function cargarCandidatos() {
         renderizarCandidatos(candidatos);
     } catch (error) {
         console.error('Error:', error);
-        alert('No se pudieron cargar los candidatos. Verifica que el servidor esté encendido.');
+        showToast('No se pudieron cargar los candidatos. Verifica que el servidor esté encendido.', 'error');
     } finally {
         loader.style.display = 'none';
         tarjeton.style.display = 'grid';
@@ -72,11 +71,9 @@ async function cargarCandidatos() {
 jornadaSelect.addEventListener('change', cargarCandidatos);
 cargarCandidatos();
 
-/* --- Autenticación de Urna --- */
+/* --- Autenticacion de Urna --- */
 async function verificarAcceso(code) {
     if (!code) return;
-
-    if (authError()) authError().style.display = 'none';
 
     try {
         const response = await fetch(`${API_URL}/auth/verificar`, {
@@ -89,16 +86,18 @@ async function verificarAcceso(code) {
             const data = await response.json();
             votoToken = data.token;
             localStorage.setItem('votoToken', votoToken);
+            showToast('Acceso concedido. ¡Ya puedes votar!', 'success');
+            document.dispatchEvent(new Event('auth-clear'));
             authScreen().classList.add('hidden');
         } else {
-            authError().style.display = 'block';
+            showToast('Código incorrecto. Inténtalo de nuevo.', 'error');
             localStorage.removeItem('votoToken');
-            authScreen().classList.remove('hidden');
         }
     } catch (e) {
         console.error(e);
-        alert('Error conectando al servidor');
-        authScreen().classList.remove('hidden');
+        showToast('Error conectando al servidor. Verifica la conexión.', 'error');
+    } finally {
+        document.dispatchEvent(new Event('auth-done'));
     }
 }
 
@@ -115,7 +114,34 @@ async function checkVotoAutologin() {
 }
 checkVotoAutologin();
 
-/* --- Renderizado de Tarjetón --- */
+// Cierre de sesion instantaneo cuando el admin la revoca la sesion
+window.addEventListener('storage', (e) => {
+    if (e.key === 'votoToken' && !e.newValue) {
+        // 1. Limpiar token en memoria
+        votoToken = '';
+
+        // 2. Cerrar el modal de confirmacion si esta abierto
+        const confirmModal = document.getElementById('confirmModal');
+        if (confirmModal) confirmModal.classList.remove('active');
+        candidatoSeleccionado = null;
+
+        // 3. Cerrar el modal de exito si estaba visible
+        const screen = document.getElementById('successScreen');
+        if (screen) screen.classList.remove('active');
+
+        // 4. Mostrar el auth overlay
+        const auth = authScreen();
+        if (auth) auth.classList.remove('hidden');
+
+        // 5. Limpiar la contrasena guardada en el input
+        document.dispatchEvent(new Event('auth-clear'));
+
+        // 6. Avisar al votante
+        showToast('Sesion cerrada por el administrador.', 'warning');
+    }
+});
+
+/* --- Renderizado de Tarjeton --- */
 function renderizarCandidatos(candidatos) {
     tarjeton.innerHTML = '';
 
@@ -160,7 +186,7 @@ function renderizarCandidatos(candidatos) {
     });
 }
 
-/* --- Modal de Confirmación --- */
+/* --- Modal de Confirmacion --- */
 function abrirModal(candidato) {
     candidatoSeleccionado = candidato;
     document.getElementById('modalNombre').textContent = candidato.nombre;
@@ -171,14 +197,34 @@ function abrirModal(candidato) {
 function cerrarModal() {
     candidatoSeleccionado = null;
     document.getElementById('confirmModal').classList.remove('active');
+    
+    // Resetear boton si quedo cargando
+    const btnConfirm = document.getElementById('btnConfirmVote');
+    if (btnConfirm) {
+        btnConfirm.disabled = false;
+        btnConfirm.textContent = 'Sí, Votar';
+    }
 }
 
-/* --- Emisión de Voto --- */
+/* --- Emision de Voto --- */
 async function enviarVoto() {
     if (!candidatoSeleccionado) return;
 
+    // Verificar que la sesion sigue activa antes de enviar
+    if (!votoToken) {
+        cerrarModal();
+        authScreen().classList.remove('hidden');
+        showToast('La sesion expiro. Solicita acceso nuevamente.', 'warning');
+        return;
+    }
+    // Deshabilitar boton y mostrar estado de carga
+    const btnConfirm = document.getElementById('btnConfirmVote');
+    if (btnConfirm) {
+        btnConfirm.disabled = true;
+        btnConfirm.textContent = 'Votando...';
+    }
+
     try {
-        const jornada = document.getElementById('jornadaSelect').value;
         const response = await fetch(`${API_URL}/votar/`, {
             method: 'POST',
             headers: { 
@@ -186,14 +232,13 @@ async function enviarVoto() {
                 'Authorization': `Bearer ${votoToken}`
             },
             body: JSON.stringify({
-                candidato_id: candidatoSeleccionado.id,
-                jornada: jornada
+                candidato_id: candidatoSeleccionado.id
             })
         });
 
         if (!response.ok) {
             if (response.status === 401) {
-                alert('Sesión inválida o expirada. Por favor, pida al administrador que ingrese el código nuevamente.');
+                showToast('Sesión inválida o expirada. Por favor, pida al administrador que ingrese el código nuevamente.', 'error');
                 votoToken = '';
                 localStorage.removeItem('votoToken');
                 authScreen().classList.remove('hidden');
@@ -208,16 +253,35 @@ async function enviarVoto() {
 
     } catch (error) {
         console.error('Error:', error);
-        alert('Hubo un error al registrar el voto. Inténtalo de nuevo.');
+        showToast('Hubo un error al registrar el voto. Inténtalo de nuevo.', 'error');
         cerrarModal();
+    } finally {
+        if (btnConfirm) {
+            btnConfirm.disabled = false;
+            btnConfirm.textContent = 'Sí, Votar';
+        }
     }
 }
 
 function mostrarExito() {
+    const fill = document.getElementById('successProgressFill');
+    const checkImg = successScreen.querySelector('.success-check-img');
+
+    if (fill) {
+        fill.style.animation = 'none';
+        void fill.offsetWidth;
+        fill.style.animation = '';
+    }
+    if (checkImg) {
+        checkImg.style.animation = 'none';
+        void checkImg.offsetWidth;
+        checkImg.style.animation = '';
+    }
+
     successScreen.classList.add('active');
 
     setTimeout(() => {
         successScreen.classList.remove('active');
         if (tarjeton) tarjeton.style.display = 'grid';
-    }, 850);
+    }, 800);
 }

@@ -21,13 +21,14 @@ def registrar_voto(voto: VotoCreate, voter: dict = Depends(get_current_voter)):
     
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT id FROM candidatos WHERE id = %s", (voto.candidato_id,))
-            if not cursor.fetchone():
+            cursor.execute("SELECT id, jornada FROM candidatos WHERE id = %s", (voto.candidato_id,))
+            candidato = cursor.fetchone()
+            if not candidato:
                 raise HTTPException(status_code=404, detail="Candidato no encontrado")
             
             cursor.execute(
                 "INSERT INTO votos (candidato_id, jornada) VALUES (%s, %s)",
-                (voto.candidato_id, voto.jornada.value)
+                (voto.candidato_id, candidato['jornada'])
             )
             conn.commit()
             return {"mensaje": "Voto registrado correctamente"}
